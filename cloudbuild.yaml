@@ -1,0 +1,26 @@
+steps:
+- name: 'docker:latest'
+  env:
+    - 'GROUP=gcr.io/sock-shop-releases'
+    - 'COMMIT=latest'
+    - 'REPO=catalogue'
+    - 'TAG=latest'
+  args: ['./scripts/build.sh' ]
+- name: 'docker:latest'
+  env:
+    - 'GROUP=gcr.io/sock-shop-releases'
+    - 'COMMIT=latest'
+    - 'REPO=catalogue'
+    - 'TAG=latest'
+  args: ['./test/test.sh', 'unit.py']
+- name: 'docker:latest'
+  env:
+    - 'GROUP=gcr.io/sock-shop-releases'
+    - 'COMMIT=latest'
+    - 'REPO=catalogue'
+    - 'TAG=latest'
+  args: ['./test/test.sh', 'container.py', '--tag', 'latest' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'tag', 'weaveworksdemos/catalogue', 'gcr.io/sock-shop-releases/catalogue' ]
+images:
+- 'gcr.io/sock-shop-releases/catalogue'
