@@ -2,11 +2,28 @@ steps:
   - name: 'docker:latest'
     env:
       - 'GROUP=gcr.io/sock-shop-releases'
-      - 'COMMIT=latest'
+      - 'COMMIT=$SHORT_SHA'
     args: ['./scripts/build.sh']
+
   - name: 'docker:latest'
     args: ['./test/test.sh', 'unit.py' ]
+
   - name: 'docker:latest'
-    args: ['./test/test.sh', 'container.py', '--tag', 'latest' ]
+    args: ['./test/test.sh', 'container.py', '--tag', '$SHORT_SHA' ]
+
+  - name: 'gcr.io/cloud-builders/go'
+    env: ["PROJECT_ROOT=tmp"]
+    args: ['get', '-u', 'github.com/mattn/goveralls']
+
+  - name: 'gcr.io/cloud-builders/go'
+    entrypoint: "./gopath/bin/goveralls"
+    args: ["-coverprofile", "coverage.out", "-repotoken", "$$COVERALLS_TOKEN"]
+    secretEnv: ['COVERALLS_TOKEN']
 images:
 - 'gcr.io/sock-shop-releases/catalogue'
+
+secrets:
+- kmsKeyName: projects/sock-shop-releases/locations/global/keyRings/sock-shop/cryptoKeys/secrets
+  secretEnv:
+    COVERALLS_TOKEN: "CiQAkTDQ4r3fSZniqJmuYCVLN0zpwzG1KFDYNlUAnSnA1Qkvz3YSSgCGYwtp7Nnys5uzrHJZQxW/kiSQXuOy66phkiABGNfELKxbE70XwDqwLDCxaEfQ1CVbxCV6MyUPQ9itSq722FvBFvXhbIqqrafh"
+
