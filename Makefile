@@ -19,7 +19,7 @@ release:
 
 test: 
 	GROUP=weaveworksdemos COMMIT=test ./scripts/build.sh
-	./test/test.sh unit.py
+	docker run --rm -v $PWD weaveworksdemos/catalogue go test -v -covermode=count -coverprofile=coverage.out
 	./test/test.sh container.py --tag $(TAG)
 
 dockertravisbuild: build

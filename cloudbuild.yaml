@@ -5,20 +5,22 @@ steps:
       - 'COMMIT=$SHORT_SHA'
     args: ['./scripts/build.sh']
 
-  - name: 'docker:latest'
-    args: ['./test/test.sh', 'unit.py' ]
+  - name: 'gcr.io/sock-shop-releases/catalogue-dev'
+    entrypoint: "gvt"
+    args: ["restore"]   
+
+  - name: 'gcr.io/cloud-builders/go'
+    env: ["PROJECT_ROOT=github.com/microservices-demo/catalogue"]
+    args: ["test", "-v", "-covermode=count", "-coverprofile=coverage.out"]
 
   - name: 'docker:latest'
     args: ['./test/test.sh', 'container.py', '--tag', '$SHORT_SHA' ]
 
-  - name: 'gcr.io/cloud-builders/go'
-    env: ["PROJECT_ROOT=tmp"]
-    args: ['get', '-u', 'github.com/mattn/goveralls']
-
-  - name: 'gcr.io/cloud-builders/go'
-    entrypoint: "./gopath/bin/goveralls"
-    args: ["-coverprofile", "coverage.out", "-repotoken", "$$COVERALLS_TOKEN"]
+  - name: 'gcr.io/sock-shop-releases/catalogue-dev'
+    entrypoint: "sh"
+    args: ["-c", "goveralls -coverprofile=coverage.out -repotoken=$$COVERALLS_TOKEN"]
     secretEnv: ['COVERALLS_TOKEN']
+    
 images:
 - 'gcr.io/sock-shop-releases/catalogue'
 
